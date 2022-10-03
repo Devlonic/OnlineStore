@@ -21,10 +21,9 @@ namespace OnlineStore.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(string? title, int? category = null)
+        public async Task<IActionResult> Index(string? title, int? category = null, SortingType sort = SortingType.TitleAsc)
         {
             var storeDbContext = _context.Products.Include(p => p.Category);
-            var vm = new ProductsListViewModel();
             ViewData["Categories"] = new SelectList(_context.Categories, "ID", "Title");
 
             IQueryable<Product> query = storeDbContext;
@@ -37,7 +36,20 @@ namespace OnlineStore.Controllers
                 query = query.Where(p => p.ID_Category == category);
             }
 
-            vm.Filtered = await query.ToListAsync();
+            query = sort switch {
+                SortingType.TitleAsc => query.OrderBy(p=>p.Title),
+                SortingType.TitleDesc => query.OrderByDescending(p => p.Title),
+                SortingType.PriceAsc => query.OrderBy(p => p.Price),
+                SortingType.PriceDesc => query.OrderByDescending(p => p.Price),
+                SortingType.CategoryAsc => query.OrderBy(p => p.Category),
+                SortingType.CategoryDesc => query.OrderByDescending(p => p.Category),
+                _ => query.OrderBy(p => p.Title),
+            };
+
+            var vm = new ProductsListViewModel() {
+                Result = await query.ToListAsync(),
+                SortingViewModel = new SortingViewModel(sort),
+            };
             return View(vm);
         }
 

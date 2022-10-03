@@ -1,4 +1,5 @@
-﻿@model OnlineStore.Models.ViewModels.ProductsListViewModel
+﻿@addTagHelper *, OnlineStore
+@model OnlineStore.Models.ViewModels.ProductsListViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -11,13 +12,13 @@
     <a asp-action="Create">Create New</a>
 </p>
 
+
 <form method="get">
     <div>
-
         <label>
             Title
         </label>
-        <input name="title"/>
+        <input name="title" />
 
         <label>
             Category
@@ -25,50 +26,44 @@
         <select name="category" asp-items="@ViewData["Categories"] as SelectList">
             <option disabled selected></option>
         </select>
-
-        <input type="submit" value="Filter"/>
+        <input type="hidden" name="sort" id="sortingInput"/>
+        <input type="submit" value="Apply" />
     </div>
-</form>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Title
-            </th>
-            <th>
-                Description
-            </th>
-            <th>
-                Price
-            </th>
-            <th>
-                Category
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Filtered) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.Title)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <sorting action="Index" is-up="@Model.SortingViewModel.IsUp" value="@Model.SortingViewModel.TitleSort" current-sorting="@Model.SortingViewModel.CurrentSort">Title</sorting>
+                </th>
+                <th>
+                    <sorting action="Index" is-up="@Model.SortingViewModel.IsUp" value="@Model.SortingViewModel.PriceSort" current-sorting="@Model.SortingViewModel.CurrentSort">Price</sorting>
+                </th>
+                <th>
+                    <sorting action="Index" is-up="@Model.SortingViewModel.IsUp" value="@Model.SortingViewModel.CategorySort" current-sorting="@Model.SortingViewModel.CurrentSort">Category</sorting>
+                </th> 
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ( var item in Model.Result ) {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category.Title)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
