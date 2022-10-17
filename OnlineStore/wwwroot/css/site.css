@@ -1,0 +1,8 @@
+.pagination-link {
+    color: blue;
+}
+
+.current {
+    color: forestgreen;
+    outline: 0.1em solid blue;
+}

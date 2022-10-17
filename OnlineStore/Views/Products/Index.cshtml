@@ -18,14 +18,15 @@
         <label>
             Title
         </label>
-        <input name="title" />
+        <input name="title" value="@Model.FilteringViewModel.Title" />
 
         <label>
             Category
         </label>
-        <select name="category" asp-items="@ViewData["Categories"] as SelectList">
+        <select id="categories" name="category" asp-items="@ViewData["Categories"] as SelectList">
             <option disabled selected></option>
         </select>
+
         <input type="hidden" name="sort" id="sortingInput"/>
         <input type="submit" value="Apply" />
     </div>
@@ -34,13 +35,13 @@
         <thead>
             <tr>
                 <th>
-                    <sorting action="Index" is-up="@Model.SortingViewModel.IsUp" value="@Model.SortingViewModel.TitleSort" current-sorting="@Model.SortingViewModel.CurrentSort">Title</sorting>
+                    <a asp-action="Index" asp-route-sort="@Model.SortingViewModel.TitleSort" asp-route-page="@(Model.PaginationViewModel.CurrentPageNumber)" asp-route-title="@Model.FilteringViewModel.Title" asp-route-category="@Model.FilteringViewModel.Category">Title</a>
                 </th>
                 <th>
-                    <sorting action="Index" is-up="@Model.SortingViewModel.IsUp" value="@Model.SortingViewModel.PriceSort" current-sorting="@Model.SortingViewModel.CurrentSort">Price</sorting>
+                    <a asp-action="Index" asp-route-sort="@Model.SortingViewModel.PriceSort" asp-route-page="@(Model.PaginationViewModel.CurrentPageNumber)" asp-route-title="@Model.FilteringViewModel.Title" asp-route-category="@Model.FilteringViewModel.Category">Price</a>
                 </th>
                 <th>
-                    <sorting action="Index" is-up="@Model.SortingViewModel.IsUp" value="@Model.SortingViewModel.CategorySort" current-sorting="@Model.SortingViewModel.CurrentSort">Category</sorting>
+                    <a asp-action="Index" asp-route-sort="@Model.SortingViewModel.CategorySort" asp-route-page="@(Model.PaginationViewModel.CurrentPageNumber)" asp-route-title="@Model.FilteringViewModel.Title" asp-route-category="@Model.FilteringViewModel.Category">Category</a>
                 </th> 
                 <th></th>
             </tr>
@@ -65,5 +66,20 @@
                 </tr>
             }
         </tbody>
+        <tfoot>
+            <div>
+                @if(Model.PaginationViewModel.HasPrevPage) {
+                    <a asp-action="Index" asp-route-page="@(Model.PaginationViewModel.CurrentPageNumber-1)" asp-route-sort="@Model.SortingViewModel.CurrentSort" asp-route-title="@Model.FilteringViewModel.Title" asp-route-category="@Model.FilteringViewModel.Category">Prev</a>
+                }
+                
+                @for ( int i = 0; i < Model.PaginationViewModel.TotalPageCount; i++ ) {
+                    <a class="pagination-link @(@Model.PaginationViewModel.CurrentPageNumber==i+1?"current":"")" asp-action="Index" asp-route-page="@(i+1)" asp-route-sort="@Model.SortingViewModel.CurrentSort" asp-route-title="@Model.FilteringViewModel.Title" asp-route-category="@Model.FilteringViewModel.Category" >@(i+1)</a>
+                }
+
+                @if ( Model.PaginationViewModel.HasNextPage ) {
+                    <a asp-action="Index" asp-route-page="@(Model.PaginationViewModel.CurrentPageNumber+1)" asp-route-sort="@Model.SortingViewModel.CurrentSort" asp-route-title="@Model.FilteringViewModel.Title" asp-route-category="@Model.FilteringViewModel.Category">Next</a>
+                }
+            </div>
+        </tfoot>
     </table>
 </form>

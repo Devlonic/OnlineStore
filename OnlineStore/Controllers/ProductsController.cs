@@ -21,20 +21,14 @@ namespace OnlineStore.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(string? title, int? category = null, SortingType sort = SortingType.TitleAsc)
+        public async Task<IActionResult> Index(string? title, int? category = null, SortingType sort = SortingType.TitleAsc, int page = 1)
         {
             var storeDbContext = _context.Products.Include(p => p.Category);
             ViewData["Categories"] = new SelectList(_context.Categories, "ID", "Title");
+            int maxCount = 20;
+
 
             IQueryable<Product> query = storeDbContext;
-
-            if ( title != null ) {
-                query = query.Where(p => p.Title.ToLower().Contains(title.ToLower()));
-            }
-
-            if ( category != null ) {
-                query = query.Where(p => p.ID_Category == category);
-            }
 
             query = sort switch {
                 SortingType.TitleAsc => query.OrderBy(p=>p.Title),
@@ -46,10 +40,21 @@ namespace OnlineStore.Controllers
                 _ => query.OrderBy(p => p.Title),
             };
 
+            FilteringViewModel filtering = new FilteringViewModel(title, category, ref query);
+
+            var totalCountForFilter = await query.CountAsync();
+
+            query = query.Skip((page - 1)*maxCount).Take(maxCount);
+            
+            var res = await query.ToListAsync();
+
             var vm = new ProductsListViewModel() {
-                Result = await query.ToListAsync(),
+                Result = res,
+                PaginationViewModel = new PaginationViewModel(totalCountForFilter, page, maxCount),
                 SortingViewModel = new SortingViewModel(sort),
+                FilteringViewModel = filtering
             };
+
             return View(vm);
         }
 
@@ -75,8 +80,18 @@ namespace OnlineStore.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
-            ViewData["ID_Category"] = new SelectList(_context.Categories, "ID", "Title");
-            return View();
+            Random random = new Random();
+            for ( int i = 0; i < 1000; i++ ) {
+                _context.Add(new Product() {
+                    Description = $"test desk for product {i}",
+                    ID_Category = random.Next(1, 4),
+                    Price = random.Next(100, 1000) + random.NextDouble(),
+                    Title = $"Product {i}",
+                });
+            }
+            _context.SaveChanges();
+            //ViewData["ID_Category"] = new SelectList(_context.Categories, "ID", "Title");
+            return View("Index");
         }
 
         // POST: Products/Create
